@@ -15,7 +15,7 @@ for ($row = 0; $row -lt $tesla.Count; $row++) {
     }
     else
     {
-        New-ADDOrganizationalUnit -Name "$($tesla[$row].departamento)" -ProtectedFromAcccidentalDeletion $false
+        New-ADOrganizationalUnit -Name "$($tesla[$row].departamento)" -ProtectedFromAccidentalDeletion $false
     }
 
     
@@ -39,15 +39,59 @@ for ($row = 0; $row -lt $tesla.Count; $row++) {
     else {
         
         New-ADUser `
-        -Name "$($tesla[$row].nombre) $($tesla[$row].apellido2) $($tesla[$row].apellido2)" `
+        -Name "$($tesla[$row].dni) " `
         -GivenName "$($tesla[$row].nombre)" `
         -Surname "$($tesla[$row].apellido2) $($tesla[$row].apellido2)" `
-        -SamAccountName "$login" `
-        -UserPrincipalName "$login@tesla.com" `
+        -SamAccountName $login `
+        -UserPrincipalName $login@tesla.com `
         -Enabled $enabled `
-        -Path "$ou" `
+        -Path $ou `
         -AccountPassword (ConvertTo-SecureString $contrasenaTemporal -AsPlainText -Force) `
         -ChangePasswordAtLogon $true
+
     }
+    if (Get-ADgroup -Filter "Name -eq 'producto' "){
+        
+            Write-Host "producto existe"
+        }
+        else
+        {
+            New-ADgroup -Name "producto" -GroupScope Global -GroupCategory Security
+            
+        }
     
+    if (Get-ADgroup -Filter "Name -eq 'oficina' "){
+        
+            Write-Host "oficina existe"
+        }
+        else
+        {
+            New-ADgroup -Name "oficina" -GroupScope Global -GroupCategory Security
+        }
+    
+    if (Get-ADgroup -Filter "Name -eq 'novel' "){
+        
+            Write-Host "novel existe"
+        }
+        else
+        {
+            New-ADgroup -Name "novel" -GroupScope Global -GroupCategory Security
+        }    
+    
+        if ( ([int]$tesla[$row].experiencia) -lt 1 ) {
+    
+            Add-ADGroupMember -Identity "novel" -Members $login
+            
+        }
+
+        if ( ($tesla[$row].departamento) -eq "Produccion" ) {
+    
+            Add-ADGroupMember -Identity "produccion" -Members $login
+            
+        }
+        else {
+            Add-ADGroupMember -Identity "oficina" -Members $login
+        }
 }
+
+
